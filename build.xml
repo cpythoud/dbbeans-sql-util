@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+
+<project name="DbBeans SQL Util" default="compile" basedir=".">
+    <property name="src.dir" value="src"/>
+    <property name="src-ascii.dir" value="src-ascii" />
+
+    <property name="build.dir" value="build"/>
+    <property name="build.classes" value="${build.dir}/classes"/>
+    <property name="build.lib" value="lib"/>
+
+    <property name="javadoc.dir" value="javadoc"/>
+
+    <target name="compile" description="Compile code" depends="native2ascii">
+        <mkdir dir="${build.classes}" />
+        <javac srcdir="${src-ascii.dir}" destdir="${build.classes}">
+            <classpath>
+                <fileset dir="${build.lib}">
+                    <include name="**/*.jar"/>
+                </fileset>
+            </classpath>
+        </javac>
+    </target>
+
+    <target name="native2ascii">
+        <mkdir dir="${src-ascii.dir}" />
+        <native2ascii src="${src.dir}" dest="${src-ascii.dir}" includes="**/*.java" />
+    </target>
+
+    <target name="cleanup" description="Clean up compiled files">
+        <delete dir="${build.dir}" />
+        <delete dir="${src-ascii.dir}" />
+        <delete dir="${javadoc.dir}" />
+    </target>
+
+    <target name="jar" description="Create file dbbeans-sql-util-(version).jar" depends="cleanup,compile">
+        <java classname="org.dbbeans.sql.util.Version" classpath="${build.classes}" outputproperty="jar.version" />
+        <jar destfile="${build.dir}/dbbeans-sql-util-${jar.version}.jar" basedir="${build.classes}" includes="org/dbbeans/sql/util/**/*" />
+    </target>
+
+    <target name="jar-src" description="Create file dbbeans-sql-util-(version).jar with source code included" depends="cleanup,compile">
+        <java classname="org.dbbeans.sql.util.Version" classpath="${build.classes}" outputproperty="jar.version" />
+        <jar destfile="${build.dir}/dbbeans-sql-${jar.version}.jar">
+            <fileset dir="${build.classes}" includes="org/dbbeans/sql/util/**/*" />
+            <fileset dir="${src-ascii.dir}" includes="org/dbbeans/sql/util/**/*" />
+        </jar>
+    </target>
+
+    <target name="doc" description="Create javadoc for this project" depends="native2ascii">
+        <mkdir dir="${javadoc.dir}" />
+        <javadoc sourcepath="${src-ascii.dir}" destdir="${javadoc.dir}" />
+    </target>
+
+</project>
