@@ -39,7 +39,7 @@
 
     <target name="jar-src" description="Create file dbbeans-sql-util-(version).jar with source code included" depends="cleanup,compile">
         <java classname="org.dbbeans.sql.util.Version" classpath="${build.classes}" outputproperty="jar.version" />
-        <jar destfile="${build.dir}/dbbeans-sql-${jar.version}.jar">
+        <jar destfile="${build.dir}/dbbeans-sql-util-${jar.version}.jar">
             <fileset dir="${build.classes}" includes="org/dbbeans/sql/util/**/*" />
             <fileset dir="${src-ascii.dir}" includes="org/dbbeans/sql/util/**/*" />
         </jar>
