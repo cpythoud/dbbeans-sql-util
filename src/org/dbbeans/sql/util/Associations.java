@@ -41,17 +41,6 @@ public class Associations {
             final String pairingTable,
             final String field1,
             final String field2,
-            final DbBeanInterface bean1,
-            final DbBeanInterface bean2,
-            final DBAccess dbAccess)
-    {
-        return arePaired(pairingTable, field1, field2, bean1.getId(), bean2.getId(), dbAccess);
-    }
-
-    public static boolean arePaired(
-            final String pairingTable,
-            final String field1,
-            final String field2,
             final long idBean1,
             final long idBean2,
             final DBAccess dbAccess)
@@ -64,6 +53,17 @@ public class Associations {
                 },
                 ResultSet::next
         );
+    }
+
+    public static boolean arePaired(
+            final String pairingTable,
+            final String field1,
+            final String field2,
+            final DbBeanInterface bean1,
+            final DbBeanInterface bean2,
+            final DBAccess dbAccess)
+    {
+        return arePaired(pairingTable, field1, field2, bean1.getId(), bean2.getId(), dbAccess);
     }
 
     private static String getAssociationQuery(final String table, final String field1, final String field2) {
@@ -87,6 +87,17 @@ public class Associations {
         );
     }
 
+    public static void createAssociation(
+            final String table,
+            final String field1,
+            final String field2,
+            final DbBeanInterface bean1,
+            final DbBeanInterface bean2,
+            final DBAccess dbAccess)
+    {
+        createAssociation(table, field1, field2, bean1.getId(), bean2.getId(), dbAccess);
+    }
+
     private static String getDissociationQuery(final String table, final String field1, final String field2) {
         return "DELETE FROM " + table + " WHERE " + field1 + "=? AND " + field2 + "=?";
     }
@@ -108,6 +119,17 @@ public class Associations {
         );
     }
 
+    public static void removeAssociation(
+            final String table,
+            final String field1,
+            final String field2,
+            final DbBeanInterface bean1,
+            final DbBeanInterface bean2,
+            final DBAccess dbAccess)
+    {
+        removeAssociation(table, field1, field2, bean1.getId(), bean2.getId(), dbAccess);
+    }
+
     public static boolean associationExists(
             final String table,
             final String field,
@@ -119,5 +141,14 @@ public class Associations {
                 stat -> stat.setLong(1, id),
                 ResultSet::next
         );
+    }
+
+    public static boolean associationExists(
+            final String table,
+            final String field,
+            final DbBeanInterface bean,
+            final DBAccess dbAccess)
+    {
+        return associationExists(table, field, bean.getId(), dbAccess);
     }
 }
