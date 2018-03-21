@@ -6,6 +6,8 @@ import org.dbbeans.sql.DBAccess;
 
 import java.sql.ResultSet;
 
+import java.util.Optional;
+
 public class Associations {
 
     public static boolean hasItem(
@@ -150,5 +152,45 @@ public class Associations {
             final DBAccess dbAccess)
     {
         return associationExists(table, field, bean.getId(), dbAccess);
+    }
+
+    public static <T extends DbBeanInterface, A extends DbBeanInterface> Optional<A> getAssociatedBean(
+            final String table,
+            final String referenceIdField,
+            final T referencedBean,
+            final A returnedBean,
+            final DBAccess dbAccess)
+    {
+        return getAssociatedBean(table, referenceIdField, referencedBean.getId(), returnedBean, dbAccess);
+    }
+
+    public static <A extends DbBeanInterface> Optional<A> getAssociatedBean(
+            final String table,
+            final String referenceIdField,
+            final long idReferencedBean,
+            final A returnedBean,
+            final DBAccess dbAccess)
+    {
+        return Optional.ofNullable(
+                dbAccess.processQuery(
+                        "SELECT id FROM " + table + " WHERE " + referenceIdField + "=?",
+                        stat -> stat.setLong(1, idReferencedBean),
+                        rs -> {
+                            int count = 0;
+                            while (rs.next()) {
+                                returnedBean.setId(rs.getLong(1));
+                                ++count;
+                            }
+
+                            if (count == 0)
+                                return null;
+
+                            if (count == 1)
+                                return returnedBean;
+
+                            throw new IllegalStateException("Too many results: " + count);
+                        }
+                )
+        );
     }
 }
