@@ -3,6 +3,7 @@ package org.dbbeans.sql.util;
 import org.beanmaker.util.DbBeanInterface;
 
 import org.dbbeans.sql.DBAccess;
+import org.dbbeans.sql.DBQuerySetup;
 
 import java.sql.ResultSet;
 
@@ -171,26 +172,20 @@ public class Associations {
             final A returnedBean,
             final DBAccess dbAccess)
     {
-        return Optional.ofNullable(
-                dbAccess.processQuery(
-                        "SELECT id FROM " + table + " WHERE " + referenceIdField + "=?",
-                        stat -> stat.setLong(1, idReferencedBean),
-                        rs -> {
-                            int count = 0;
-                            while (rs.next()) {
-                                returnedBean.setId(rs.getLong(1));
-                                ++count;
-                            }
-
-                            if (count == 0)
-                                return null;
-
-                            if (count == 1)
-                                return returnedBean;
-
-                            throw new IllegalStateException("Too many results: " + count);
-                        }
-                )
+        return getAssociatedBean(
+                "SELECT id FROM " + table + " WHERE " + referenceIdField + "=?",
+                stat -> stat.setLong(1, idReferencedBean),
+                returnedBean,
+                dbAccess
         );
+    }
+
+    public static <A extends DbBeanInterface> Optional<A> getAssociatedBean(
+            final String query,
+            final DBQuerySetup querySetup,
+            final A returnedBean,
+            final DBAccess dbAccess)
+    {
+        return BasicQueries.getUniqueElement(query, querySetup, returnedBean, dbAccess);
     }
 }
