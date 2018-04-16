@@ -37,4 +37,28 @@ public class BasicQueries {
                 )
         );
     }
+
+    public static long getUniqueID(
+            final String query,
+            final DBQuerySetup querySetup,
+            final DBAccess dbAccess)
+    {
+        return dbAccess.processQuery(
+                query,
+                querySetup,
+                rs -> {
+                    long id = 0;
+                    int count = 0;
+                    while (rs.next()) {
+                        id = rs.getLong(1);
+                        ++count;
+                    }
+
+                    if (count > 1)
+                        throw new IllegalStateException("Too many results: " + count);
+
+                    return id;
+                }
+        );
+    }
 }
