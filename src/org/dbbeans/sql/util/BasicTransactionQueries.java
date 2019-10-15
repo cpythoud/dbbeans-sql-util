@@ -8,6 +8,8 @@ import org.dbbeans.sql.DBTransaction;
 
 import java.util.Optional;
 
+import java.util.function.Consumer;
+
 public class BasicTransactionQueries {
 
     public static <B extends DbBeanInterface> Optional<B> getUniqueElement(
@@ -37,5 +39,31 @@ public class BasicTransactionQueries {
                 querySetup,
                 (DBQueryRetrieveData<Long>) BasicQueries::getUniqueID
         );
+    }
+
+    public static void wrap(Consumer<DBTransaction> transactedFunction, DBTransaction transaction) {
+        wrap(transactedFunction, transaction, null);
+    }
+
+    public static void wrap(
+            Consumer<DBTransaction> transactedFunction,
+            DBTransaction transaction,
+            Consumer<Throwable> errorProcessor)
+    {
+        try {
+            transactedFunction.accept(transaction);
+        } catch (RuntimeException rtex) {
+            transaction.rollback();
+            if (errorProcessor != null)
+                errorProcessor.accept(rtex);
+            throw rtex;
+        } catch (Exception ex) {
+            transaction.rollback();
+            if (errorProcessor != null)
+                errorProcessor.accept(ex);
+            throw new RuntimeException(ex);
+        }
+
+        transaction.commit();
     }
 }
