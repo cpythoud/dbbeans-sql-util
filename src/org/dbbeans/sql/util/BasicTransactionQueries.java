@@ -9,6 +9,7 @@ import org.dbbeans.sql.DBTransaction;
 import java.util.Optional;
 
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class BasicTransactionQueries {
 
@@ -65,5 +66,34 @@ public class BasicTransactionQueries {
         }
 
         transaction.commit();
+    }
+
+    public static <B extends DbBeanInterface> B wrap(Function<DBTransaction, B> transactedGetter, DBTransaction transaction) {
+        return wrap(transactedGetter, transaction, null);
+    }
+
+    public static <B extends DbBeanInterface> B wrap(
+            Function<DBTransaction, B> transactedGetter,
+            DBTransaction transaction,
+            Consumer<Throwable> errorProcessor)
+    {
+        B bean;
+        try {
+            bean = transactedGetter.apply(transaction);
+        } catch (RuntimeException rtex) {
+            transaction.rollback();
+            if (errorProcessor != null)
+                errorProcessor.accept(rtex);
+            throw rtex;
+        } catch (Exception ex) {
+            transaction.rollback();
+            if (errorProcessor != null)
+                errorProcessor.accept(ex);
+            throw new RuntimeException(ex);
+        }
+
+        transaction.commit();
+
+        return bean;
     }
 }
