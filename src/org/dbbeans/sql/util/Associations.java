@@ -7,6 +7,8 @@ import org.dbbeans.sql.DBQuerySetup;
 
 import java.sql.ResultSet;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Optional;
 
 public class Associations {
@@ -187,5 +189,45 @@ public class Associations {
             final DBAccess dbAccess)
     {
         return BasicQueries.getUniqueElement(query, querySetup, returnedBean, dbAccess);
+    }
+
+    public static boolean associationExists(
+            final Collection<String> tables,
+            final String field,
+            final long id,
+            final DBAccess dbAccess)
+    {
+        for (String table: tables)
+            if (associationExists(table, field, id, dbAccess))
+                return true;
+
+        return false;
+    }
+
+    public static boolean associationExists(
+            final Collection<String> tables,
+            final String field,
+            final DbBeanInterface bean,
+            final DBAccess dbAccess)
+    {
+        return associationExists(tables, field, bean.getId(), dbAccess);
+    }
+
+    public static boolean associationExists(
+            final String field,
+            final long id,
+            final DBAccess dbAccess,
+            final String... tables)
+    {
+        return associationExists(Arrays.asList(tables), field, id, dbAccess);
+    }
+
+    public static boolean associationExists(
+            final String field,
+            final DbBeanInterface bean,
+            final DBAccess dbAccess,
+            final String... tables)
+    {
+        return associationExists(Arrays.asList(tables), field, bean.getId(), dbAccess);
     }
 }

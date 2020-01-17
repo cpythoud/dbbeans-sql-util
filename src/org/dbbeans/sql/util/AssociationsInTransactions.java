@@ -7,6 +7,8 @@ import org.dbbeans.sql.DBTransaction;
 
 import java.sql.ResultSet;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Optional;
 
 public class AssociationsInTransactions {
@@ -187,5 +189,45 @@ public class AssociationsInTransactions {
             final DBTransaction transaction)
     {
         return BasicTransactionQueries.getUniqueElement(query, querySetup, returnedBean, transaction);
+    }
+
+    public static boolean associationExists(
+            final Collection<String> tables,
+            final String field,
+            final long id,
+            final DBTransaction transaction)
+    {
+        for (String table: tables)
+            if (associationExists(table, field, id, transaction))
+                return true;
+
+        return false;
+    }
+
+    public static boolean associationExists(
+            final Collection<String> tables,
+            final String field,
+            final DbBeanInterface bean,
+            final DBTransaction transaction)
+    {
+        return associationExists(tables, field, bean.getId(), transaction);
+    }
+
+    public static boolean associationExists(
+            final String field,
+            final long id,
+            final DBTransaction transaction,
+            final String... tables)
+    {
+        return associationExists(Arrays.asList(tables), field, id, transaction);
+    }
+
+    public static boolean associationExists(
+            final String field,
+            final DbBeanInterface bean,
+            final DBTransaction transaction,
+            final String... tables)
+    {
+        return associationExists(Arrays.asList(tables), field, bean.getId(), transaction);
     }
 }
