@@ -71,4 +71,24 @@ public class BasicQueries {
 
         return id;
     }
+
+    public static <B extends DbBeanInterface> B getFromItemOrder(
+            final String table,
+            final long itemOrder,
+            B returnedBean,
+            final DBAccess dbAccess)
+    {
+        return dbAccess.processQuery(
+                "SELECT id FROM " + table + " WHERE item_order=?",
+                stat -> stat.setLong(1, itemOrder),
+                rs -> {
+                    if (rs.next()) {
+                        returnedBean.setId(rs.getLong(1));
+                        return returnedBean;
+                    }
+
+                    throw new IllegalArgumentException("No bean with item_order #" + itemOrder);
+                }
+        );
+    }
 }
